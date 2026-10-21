@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نموذج تسجيل البيانات المهنية</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Cairo & Tajawal for modern Arabic UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Cairo', 'Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12 flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="bg-gradient-to-r from-brand-800 via-brand-700 to-teal-800 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
+                    <i class="fa-solid fa-user-plus text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">بوابة تسجيل الكفاءات</h1>
+                    <p class="text-xs text-brand-100 font-light">نظام إدارة وجمع بيانات التوظيف</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="scrollToSection('records-section')" class="bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm px-3 py-2 rounded-lg font-medium transition duration-200 flex items-center gap-2 border border-white/10">
+                    <i class="fa-solid fa-table"></i>
+                    <span class="hidden sm:inline">سجل البيانات</span>
+                    <span id="badge-count" class="bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex-grow">
+        
+        <!-- Top Notification Banner -->
+        <div id="status-toast" class="hidden mb-6 p-4 rounded-xl shadow-md border flex items-center justify-between transition-all transform duration-300">
+            <div class="flex items-center gap-3">
+                <i id="toast-icon" class="text-2xl"></i>
+                <div>
+                    <h4 id="toast-title" class="font-bold text-sm sm:text-base"></h4>
+                    <p id="toast-message" class="text-xs sm:text-sm opacity-90"></p>
+                </div>
+            </div>
+            <button onclick="closeToast()" class="text-slate-400 hover:text-slate-600 p-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Registration Form Card -->
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden mb-12">
+            <!-- Card Header -->
+            <div class="bg-gradient-to-r from-slate-50 to-teal-50/30 px-6 py-5 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-id-card text-brand-600"></i>
+                        نموذج تسجيل بيانات مرشح جديد
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">يرجى ملء الخانات التالية بعناية، الحقول المشار إليها بـ (<span class="text-red-500 font-bold">*</span>) إجبارية.</p>
+                </div>
+                <button type="button" onclick="resetFormWithConfirmation()" class="text-xs sm:text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-slate-200 transition duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    تفريع النموذج / إضافة عميل جديد
+                </button>
+            </div>
+
+            <!-- Form Content -->
+            <form id="registrationForm" onsubmit="handleFormSubmit(event)" class="p-6 sm:p-8 space-y-6" novalidate>
+                
+                <!-- Section 1: البيانات الشخصية والاتصال -->
+                <div>
+                    <h3 class="text-sm font-semibold text-brand-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-user text-brand-500"></i>
+                        البيانات الشخصية والمعلومات الأساسية
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        
+                        <!-- 1. الاسم الكامل -->
+                        <div>
+                            <label for="fullName" class="block text-xs font-bold text-slate-700 mb-1">
+                                الاسم الكامل <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <input type="text" id="fullName" name="fullName" required placeholder="مثال: محمد أحمد علي" 
+                                    class="w-full pr-10 pl-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200">
+                            </div>
+                            <span class="text-xs text-red-500 hidden mt-1" id="err-fullName">يرجى إدخال الاسم الكامل</span>
+                        </div>
+
+                        <!-- 2. الجنسية -->
+                        <div>
+                            <label for="nationality" class="block text-xs font-bold text-slate-700 mb-1">
+                                الجنسية <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-flag"></i>
+                                </span>
+                                <input type="text" id="nationality" name="nationality" required placeholder="مثال: سعودي، مصري، أردني..." 
+                                    class="w-full pr-10 pl-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200">
+                            </div>
+                            <span class="text-xs text-red-500 hidden mt-1" id="err-nationality">يرجى تحديد الجنسية</span>
+                        </div>
+
+                        <!-- 3. رقم الهاتف -->
+                        <div>
+                            <label for="phone" class="block text-xs font-bold text-slate-700 mb-1">
+                                رقم الهاتف <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-phone"></i>
+                                </span>
+                                <input type="tel" id="phone" name="phone" required placeholder="05xxxxxxxx" dir="ltr"
+                                    class="w-full pr-10 pl-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200 text-right">
+                            </div>
+                            <span class="text-xs text-red-500 hidden mt-1" id="err-phone">يرجى إدخال رقم هاتف صحيح</span>
+                        </div>
+
+                        <!-- 4. البريد الإلكتروني -->
+                        <div>
+                            <label for="email" class="block text-xs font-bold text-slate-700 mb-1">
+                                البريد الإلكتروني <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </span>
+                                <input type="text" id="email" name="email" required placeholder="أدخل البريد الإلكتروني أو المعرّف" dir="ltr"
+                                    class="w-full pr-10 pl-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200 text-right">
+                            </div>
+                            <span class="text-xs text-red-500 hidden mt-1" id="err-email">يرجى إدخال البريد الإلكتروني</span>
+                        </div>
+
+                        <!-- 5. العنوان -->
+                        <div>
+                            <label for="address" class="block text-xs font-bold text-slate-700 mb-1">العنوان</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </span>
+                                <input type="text" id="address" name="address" placeholder="المدينة، الحي، الشارع" 
+                                    class="w-full pr-10 pl-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200">
+                            </div>
+                        </div>
+
+                        <!-- 6. الإقامة الحالية -->
+                        <div>
+                            <label for="currentResidence" class="block text-xs font-bold text-slate-700 mb-1">الإقامة الحالية</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-house-user"></i>
+                                </span>
+                                <input type="text" id="currentResidence" name="currentResidence" placeholder="مكان الإقامة الحالية" 
+                                    class="w-full pr-10 pl-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <hr class="border-slate-100 my-6">
+
+                <!-- Section 2: المؤهلات والتخصص المهني -->
+                <div>
+                    <h3 class="text-sm font-semibold text-brand-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-briefcase text-brand-500"></i>
+                        المؤهلات والتخصص المهني
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        
+                        <!-- 7. التخصص -->
+                        <div>
+                            <label for="specialty" class="block text-xs font-bold text-slate-700 mb-1">
+                                التخصص <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-stethoscope"></i>
+                                </span>
+                                <input type="text" id="specialty" name="specialty" required placeholder="مثال: طبيب عام، مهندس شبكات..." 
+                                    class="w-full pr-10 pl-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200">
+                            </div>
+                            <span class="text-xs text-red-500 hidden mt-1" id="err-specialty">يرجى تحديد التخصص</span>
+                        </div>
+
+                        <!-- 12. درجة التصنيف -->
+                        <div>
+                            <label for="classificationLevel" class="block text-xs font-bold text-slate-700 mb-1">درجة التصنيف</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-award"></i>
+                                </span>
+                                <select id="classificationLevel" name="classificationLevel" 
+                                    class="w-full pr-10 pl-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200 appearance-none">
+                                    <option value="">اختر درجة التصنيف...</option>
+                                    <option value="استشاري">استشاري (Consultant)</option>
+                                    <option value="نائب أول">نائب أول (Senior Specialist)</option>
+                                    <option value="نائب / اخصائي">نائب / أخصائي (Specialist)</option>
+                                    <option value="طبيب مقيم">طبيب مقيم (Resident)</option>
+                                    <option value="فني">فني (Technician)</option>
+                                    <option value="أخرى / غير صحي">درجة أخرى / غير محدد</option>
+                                </select>
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 13. عدد سنوات الخبرة -->
+                        <div>
+                            <label for="experienceYears" class="block text-xs font-bold text-slate-700 mb-1">عدد سنوات الخبرة</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-business-time"></i>
+                                </span>
+                                <input type="number" id="experienceYears" name="experienceYears" min="0" max="50" placeholder="0" 
+                                    class="w-full pr-10 pl-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Section 3: المربعات المتاحة والوثائق -->
+                <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80">
+                    <label class="block text-xs font-bold text-slate-700 mb-3">حالة الوثائق والتراخيص الرسمية:</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        
+                        <!-- 9. كفالة -->
+                        <label class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-brand-500 transition duration-200 shadow-sm">
+                            <input type="checkbox" id="hasKafala" name="hasKafala" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-handshake text-slate-500"></i>
+                                <span class="text-xs sm:text-sm font-medium text-slate-800">كفالة (قابل لنقل الكفالة)</span>
+                            </div>
+                        </label>
+
+                        <!-- 10. تأشيرة -->
+                        <label class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-brand-500 transition duration-200 shadow-sm">
+                            <input type="checkbox" id="hasVisa" name="hasVisa" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-passport text-slate-500"></i>
+                                <span class="text-xs sm:text-sm font-medium text-slate-800">تأشيرة (متوفرة / سارية)</span>
+                            </div>
+                        </label>
+
+                        <!-- 11. الترخيص المهني -->
+                        <label class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-brand-500 transition duration-200 shadow-sm">
+                            <input type="checkbox" id="hasLicense" name="hasLicense" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-file-signature text-slate-500"></i>
+                                <span class="text-xs sm:text-sm font-medium text-slate-800">الترخيص المهني (ساري المفعول)</span>
+                            </div>
+                        </label>
+
+                    </div>
+                </div>
+
+                <!-- Section 4: السيرة الذاتية والملاحظات -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <!-- 8. السيرة الذاتية (ارفاق) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">إرفاق السيرة الذاتية (PDF / Word)</label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-brand-500 bg-slate-50/50 hover:bg-slate-50 transition duration-200 relative group">
+                            <div class="space-y-1 text-center">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 group-hover:text-brand-600 transition"></i>
+                                <div class="flex text-xs text-slate-600">
+                                    <label for="cvFile" class="relative cursor-pointer bg-transparent rounded-md font-bold text-brand-600 hover:text-brand-500">
+                                        <span>اختر ملفاً</span>
+                                        <input id="cvFile" name="cvFile" type="file" accept=".pdf,.doc,.docx" class="sr-only" onchange="updateFileName(this)">
+                                    </label>
+                                    <p class="pr-1">أو اسحب الملف هنا</p>
+                                </div>
+                                <p class="text-xs text-slate-400">PDF, DOC, DOCX حتى 10MB</p>
+                                <p id="file-name-display" class="text-xs font-semibold text-brand-700 mt-2 bg-brand-50 px-2 py-1 rounded hidden"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 14. ملاحظات إضافية -->
+                    <div>
+                        <label for="notes" class="block text-xs font-bold text-slate-700 mb-1">ملاحظات إضافية</label>
+                        <textarea id="notes" name="notes" rows="4" placeholder="أدخل أي معلومات إضافية أو تفاصيل قد تفيد في التقييم..." 
+                            class="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition duration-200 resize-none"></textarea>
+                    </div>
+
+                </div>
+
+                <!-- Submit & Actions Buttons -->
+                <div class="pt-4 flex flex-col sm:flex-row gap-3 justify-end items-center border-t border-slate-100">
+                    <button type="button" onclick="resetForm()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-100 transition duration-200">
+                        <i class="fa-solid fa-eraser ml-1"></i>
+                        مسح الحقول
+                    </button>
+                    <button type="submit" class="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-teal-600 text-white text-sm font-bold shadow-lg shadow-brand-600/30 hover:shadow-brand-600/50 hover:from-brand-700 hover:to-teal-700 transition duration-200">
+                        <i class="fa-solid fa-paper-plane ml-1"></i>
+                        حفظ وإرسال البيانات
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Registered Records Section (Interactive Table & Dynamic Sheet Preview) -->
+        <section id="records-section" class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+            <!-- Table Header Bar -->
+            <div class="bg-slate-800 text-white p-5 flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-brand-400"></i>
+                        جدول المسجلين تلقائياً (الشيت الموحد)
+                    </h3>
+                    <p class="text-xs text-slate-300 mt-1">يتم تحديث الجدول وحفظ البيانات تلقائياً، يمكنك تصدير البيانات إلى ملف Excel.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition duration-200 flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-file-excel"></i>
+                        تصدير إلى Excel (CSV)
+                    </button>
+                    <button onclick="clearAllRecords()" class="bg-red-500/20 hover:bg-red-500/30 text-red-200 hover:text-white border border-red-500/30 px-3 py-2 rounded-lg text-xs transition duration-200">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search & Filters -->
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-4">
+                <div class="relative w-full max-w-xs">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchInput" oninput="filterRecords()" placeholder="بحث في السجلات..." 
+                        class="w-full pr-9 pl-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-500">
+                </div>
+                <div class="text-xs text-slate-500 font-medium">
+                    إجمالي المسجلين: <span id="records-count-text" class="font-bold text-slate-800">0</span>
+                </div>
+            </div>
+
+            <!-- Table Body -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-xs border-collapse">
+                    <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                        <tr>
+                            <th class="p-3 whitespace-nowrap">الرقم المرجعي</th>
+                            <th class="p-3 whitespace-nowrap">تاريخ ووقت الإرسال</th>
+                            <th class="p-3 whitespace-nowrap">الاسم الكامل</th>
+                            <th class="p-3 whitespace-nowrap">الجنسية</th>
+                            <th class="p-3 whitespace-nowrap">العنوان</th>
+                            <th class="p-3 whitespace-nowrap">الإقامة الحالية</th>
+                            <th class="p-3 whitespace-nowrap">رقم الهاتف</th>
+                            <th class="p-3 whitespace-nowrap">البريد الإلكتروني</th>
+                            <th class="p-3 whitespace-nowrap">التخصص</th>
+                            <th class="p-3 whitespace-nowrap">اسم ملف السيرة الذاتية</th>
+                            <th class="p-3 whitespace-nowrap">كفالة</th>
+                            <th class="p-3 whitespace-nowrap">تأشيرة</th>
+                            <th class="p-3 whitespace-nowrap">الترخيص المهني</th>
+                            <th class="p-3 whitespace-nowrap">درجة التصنيف</th>
+                            <th class="p-3 whitespace-nowrap">عدد سنوات الخبرة</th>
+                            <th class="p-3 whitespace-nowrap">ملاحظات إضافية</th>
+                            <th class="p-3 whitespace-nowrap text-center">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTableBody" class="divide-y divide-slate-200 text-slate-600">
+                        <!-- Dynamic Records Rendered Here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty Table State -->
+            <div id="empty-state" class="p-12 text-center">
+                <i class="fa-regular fa-folder-open text-4xl text-slate-300 mb-3"></i>
+                <p class="text-slate-500 font-medium text-sm">لا توجد بيانات مسجلة حالياً.</p>
+                <p class="text-slate-400 text-xs mt-1">قم بملء النموذج أعلاه وإرساله ليتم إضافته مباشرة إلى جدول الشيت.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-xs text-slate-400 py-4 border-t border-slate-200">
+        <p>نظام تسجيل المرشحين والبيانات الموحد &copy; 2026 - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Storage Key
+        const STORAGE_KEY = 'candidate_registration_records_v1';
+        
+        // Application State
+        let candidateRecords = [];
+
+        // Load records from LocalStorage on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    candidateRecords = JSON.parse(savedData);
+                } catch (e) {
+                    candidateRecords = [];
+                }
+            }
+            renderTable();
+        });
+
+        // Handle File Input Name Display
+        function updateFileName(input) {
+            const fileNameDisplay = document.getElementById('file-name-display');
+            if (input.files && input.files[0]) {
+                fileNameDisplay.textContent = `الملف المرفق: ${input.files[0].name}`;
+                fileNameDisplay.classList.remove('hidden');
+            } else {
+                fileNameDisplay.textContent = '';
+                fileNameDisplay.classList.add('hidden');
+            }
+        }
+
+        // Form Validation & Submission
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            // Clear former errors
+            clearValidationErrors();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const nationality = document.getElementById('nationality').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const specialty = document.getElementById('specialty').value.trim();
+
+            let isValid = true;
+
+            // Required validation
+            if (!fullName) {
+                showError('fullName', 'الاسم الكامل مطلوب');
+                isValid = false;
+            }
+            if (!nationality) {
+                showError('nationality', 'الجنسية مطلوبة');
+                isValid = false;
+            }
+            if (!phone || phone.length < 7) {
+                showError('phone', 'يرجى كتابة رقم هاتف صحيح');
+                isValid = false;
+            }
+            if (!email) {
+                showError('email', 'يرجى إدخال البريد الإلكتروني');
+                isValid = false;
+            }
+            if (!specialty) {
+                showError('specialty', 'التخصص مطلوب');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                showToast('تنبيه!', 'يرجى مراجعة وتعبئة جميع الحقول المطلوبة بشكل صحيح.', 'warning');
+                return;
+            }
+
+            // Get File name if uploaded
+            const cvFileInput = document.getElementById('cvFile');
+            const cvFileName = cvFileInput.files && cvFileInput.files[0] ? cvFileInput.files[0].name : 'لا يوجد ملف';
+
+            // Generate Timestamp and Reference Code
+            const now = new Date();
+            const timestamp = now.toLocaleDateString('ar-EG') + ' ' + now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+            const refCode = 'REF-' + Math.floor(100000 + Math.random() * 900000);
+
+            // Construct Entry Object
+            const record = {
+                id: Date.now(),
+                refNumber: refCode,
+                timestamp: timestamp,
+                fullName: fullName,
+                nationality: nationality,
+                address: document.getElementById('address').value.trim() || 'غير محدد',
+                currentResidence: document.getElementById('currentResidence').value.trim() || 'غير محدد',
+                phone: phone,
+                email: email,
+                specialty: specialty,
+                cvFileName: cvFileName,
+                hasKafala: document.getElementById('hasKafala').checked ? 'نعم' : 'لا',
+                hasVisa: document.getElementById('hasVisa').checked ? 'نعم' : 'لا',
+                hasLicense: document.getElementById('hasLicense').checked ? 'نعم' : 'لا',
+                classificationLevel: document.getElementById('classificationLevel').value || 'غير محدد',
+                experienceYears: document.getElementById('experienceYears').value || '0',
+                notes: document.getElementById('notes').value.trim() || '-'
+            };
+
+            // Save Record
+            candidateRecords.unshift(record);
+            saveToStorage();
+
+            // Refresh UI
+            renderTable();
+            resetForm();
+
+            // Success Notification
+            showToast('تم التسجيل بنجاح!', `تمت إضافة بيانات (${fullName}) برقم مرجعي ${refCode}`, 'success');
+
+            // Scroll to newly added row
+            scrollToSection('records-section');
+        }
+
+        // Validate Email Helper
+        function validateEmail(email) {
+            return String(email)
+                .toLowerCase()
+                .match(
+                    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\ me\.)+[a-zA-Z]{2,}))$/
+                );
+        }
+
+        // Display Validation Errors
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errSpan = document.getElementById(`err-${fieldId}`);
+            if (field) {
+                field.classList.add('border-red-500', 'bg-red-50/20');
+            }
+            if (errSpan) {
+                errSpan.textContent = message;
+                errSpan.classList.remove('hidden');
+            }
+        }
+
+        // Clear Errors
+        function clearValidationErrors() {
+            const fields = ['fullName', 'nationality', 'phone', 'email', 'specialty'];
+            fields.forEach(id => {
+                const f = document.getElementById(id);
+                const e = document.getElementById(`err-${id}`);
+                if (f) f.classList.remove('border-red-500', 'bg-red-50/20');
+                if (e) e.classList.add('hidden');
+            });
+        }
+
+        // Render Records Table
+        function renderTable(filterQuery = '') {
+            const tbody = document.getElementById('recordsTableBody');
+            const emptyState = document.getElementById('empty-state');
+            const badgeCount = document.getElementById('badge-count');
+            const recordsCountText = document.getElementById('records-count-text');
+
+            tbody.innerHTML = '';
+
+            const filteredRecords = candidateRecords.filter(item => {
+                if (!filterQuery) return true;
+                const query = filterQuery.toLowerCase();
+                return (
+                    item.fullName.toLowerCase().includes(query) ||
+                    item.refNumber.toLowerCase().includes(query) ||
+                    item.specialty.toLowerCase().includes(query) ||
+                    item.nationality.toLowerCase().includes(query) ||
+                    item.phone.includes(query)
+                );
+            });
+
+            badgeCount.textContent = candidateRecords.length;
+            recordsCountText.textContent = candidateRecords.length;
+
+            if (filteredRecords.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            filteredRecords.forEach((item) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-100 transition duration-150";
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-brand-700 whitespace-nowrap">${escapeHtml(item.refNumber)}</td>
+                    <td class="p-3 whitespace-nowrap text-slate-500">${escapeHtml(item.timestamp)}</td>
+                    <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">${escapeHtml(item.fullName)}</td>
+                    <td class="p-3 whitespace-nowrap">${escapeHtml(item.nationality)}</td>
+                    <td class="p-3 whitespace-nowrap">${escapeHtml(item.address)}</td>
+                    <td class="p-3 whitespace-nowrap">${escapeHtml(item.currentResidence)}</td>
+                    <td class="p-3 whitespace-nowrap dir-ltr text-right">${escapeHtml(item.phone)}</td>
+                    <td class="p-3 whitespace-nowrap dir-ltr text-right">${escapeHtml(item.email)}</td>
+                    <td class="p-3 font-medium text-slate-700 whitespace-nowrap">${escapeHtml(item.specialty)}</td>
+                    <td class="p-3 whitespace-nowrap">
+                        <span class="inline-flex items-center gap-1 text-slate-600 bg-slate-100 px-2 py-0.5 rounded text-xs">
+                            <i class="fa-solid fa-paperclip"></i>
+                            ${escapeHtml(item.cvFileName)}
+                        </span>
+                    </td>
+                    <td class="p-3 whitespace-nowrap text-center">${getBadgeHtml(item.hasKafala)}</td>
+                    <td class="p-3 whitespace-nowrap text-center">${getBadgeHtml(item.hasVisa)}</td>
+                    <td class="p-3 whitespace-nowrap text-center">${getBadgeHtml(item.hasLicense)}</td>
+                    <td class="p-3 whitespace-nowrap">${escapeHtml(item.classificationLevel)}</td>
+                    <td class="p-3 whitespace-nowrap text-center">${escapeHtml(item.experienceYears)} سنة</td>
+                    <td class="p-3 whitespace-nowrap max-w-xs truncate" title="${escapeHtml(item.notes)}">${escapeHtml(item.notes)}</td>
+                    <td class="p-3 whitespace-nowrap text-center">
+                        <button onclick="deleteRecord(${item.id})" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title="حذف Record">
+                            <i class="fa-solid fa-trash text-sm"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Helper Status Badge
+        function getBadgeHtml(val) {
+            if (val === 'نعم') {
+                return `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xs">نعم</span>`;
+            }
+            return `<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">لا</span>`;
+        }
+
+        // Filter Table
+        function filterRecords() {
+            const query = document.getElementById('searchInput').value;
+            renderTable(query);
+        }
+
+        // Reset Form Fields
+        function resetForm() {
+            document.getElementById('registrationForm').reset();
+            document.getElementById('file-name-display').classList.add('hidden');
+            clearValidationErrors();
+        }
+
+        function resetFormWithConfirmation() {
+            resetForm();
+            showToast('تم تفريغ النموذج', 'يمكنك الآن إضافة بيانات مرشح/عميل جديد بسهولة.', 'info');
+        }
+
+        // Delete Single Record
+        function deleteRecord(id) {
+            if (confirm('هل أنت تأكد من رغبتك في حذف هذا السجل؟')) {
+                candidateRecords = candidateRecords.filter(r => r.id !== id);
+                saveToStorage();
+                renderTable();
+                showToast('تم الحذف', 'تم حذف السجل المحدد بنجاح.', 'info');
+            }
+        }
+
+        // Clear All
+        function clearAllRecords() {
+            if (candidateRecords.length === 0) return;
+            if (confirm('تنبيه: هل ترغب بحذف كافة السجلات المرفقة نهائياً؟')) {
+                candidateRecords = [];
+                saveToStorage();
+                renderTable();
+                showToast('تم المسح', 'تم مسح كافة البيانات المسجلة.', 'info');
+            }
+        }
+
+        // Local Storage Save
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(candidateRecords));
+        }
+
+        // Export to CSV with Full Arabic Headers & UTF-8 BOM
+        function exportToCSV() {
+            if (candidateRecords.length === 0) {
+                showToast('لا توجد بيانات', 'لا توجد بيانات مسجلة لتصديرها.', 'warning');
+                return;
+            }
+
+            // Arabic Sheet Headers (الخانة بالكامل كما طلب)
+            const headers = [
+                "الرقم المرجعي",
+                "تاريخ ووقت الإرسال",
+                "الاسم الكامل",
+                "الجنسية",
+                "العنوان",
+                "الإقامة الحالية",
+                "رقم الهاتف",
+                "البريد الإلكتروني",
+                "التخصص",
+                "اسم ملف السيرة الذاتية",
+                "كفالة",
+                "تأشيرة",
+                "الترخيص المهني",
+                "درجة التصنيف",
+                "عدد سنوات الخبرة",
+                "ملاحظات إضافية"
+            ];
+
+            const rows = candidateRecords.map(item => [
+                item.refNumber,
+                item.timestamp,
+                item.fullName,
+                item.nationality,
+                item.address,
+                item.currentResidence,
+                item.phone,
+                item.email,
+                item.specialty,
+                item.cvFileName,
+                item.hasKafala,
+                item.hasVisa,
+                item.hasLicense,
+                item.classificationLevel,
+                item.experienceYears,
+                item.notes
+            ]);
+
+            // Build CSV Content
+            let csvContent = headers.join(",") + "\n";
+
+            rows.forEach(row => {
+                const escapedRow = row.map(field => {
+                    // Escape quotes and line breaks for CSV formula safe parsing
+                    let stringField = String(field || '');
+                    if (stringField.includes(",") || stringField.includes('"') || stringField.includes("\n")) {
+                        stringField = '"' + stringField.replace(/"/g, '""') + '"';
+                    }
+                    return stringField;
+                });
+                csvContent += escapedRow.join(",") + "\n";
+            });
+
+            // Add UTF-8 BOM so Excel opens Arabic correctly
+            const BOM = "\uFEFF";
+            const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `سجل_المرشحين_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('تم التصدير!', 'تم تصدير البيانات بنجاح في ملف CSV متوافق مع Excel.', 'success');
+        }
+
+        // Notification Toast
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('status-toast');
+            const titleEl = document.getElementById('toast-title');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+
+            // Types Styling
+            toast.className = "mb-6 p-4 rounded-xl shadow-md border flex items-center justify-between transition-all duration-300";
+
+            if (type === 'success') {
+                toast.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-900');
+                iconEl.className = "fa-solid fa-circle-check text-emerald-600 text-2xl";
+            } else if (type === 'warning') {
+                toast.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-900');
+                iconEl.className = "fa-solid fa-triangle-exclamation text-amber-600 text-2xl";
+            } else {
+                toast.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-900');
+                iconEl.className = "fa-solid fa-circle-info text-blue-600 text-2xl";
+            }
+
+            toast.classList.remove('hidden');
+
+            // Auto Hide
+            setTimeout(() => {
+                closeToast();
+            }, 6000);
+        }
+
+        function closeToast() {
+            document.getElementById('status-toast').classList.add('hidden');
+        }
+
+        // Smooth Scroll Helper
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Sanitize Output
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
